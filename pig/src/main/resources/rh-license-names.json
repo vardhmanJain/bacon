@@ -67,7 +67,7 @@
         ]
     },
     {
-        "name": "GNU Lesser General Public License",
+        "name": "GNU Lesser General Public License v3.0 or later",
         "url": "http://www.gnu.org/licenses/lgpl-3.0-standalone.html",
         "textUrl": "http://www.gnu.org/licenses/lgpl-3.0.txt",
         "aliases": [
