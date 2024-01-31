@@ -1365,5 +1365,16 @@
               "url": "http://www.apache.org/licenses/LICENSE-2.0"
           }
       ]
+  },
+  {
+      "groupId": "com.mysql",
+      "artifactId": "mysql-connector-j",
+      "version-regexp": "8.2.0.redhat-.+",
+      "licenses": [
+        {
+          "name": "GNU General Public License v2.0 only",
+          "url": "https://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html"
+        }
+      ]
   }
 ]
