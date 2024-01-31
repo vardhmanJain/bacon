@@ -1369,7 +1369,7 @@
   {
       "groupId": "com.mysql",
       "artifactId": "mysql-connector-j",
-      "version-regexp": "8.2.0.redhat-.+",
+      "version-regexp": "8.2.0.redhat-00001",
       "licenses": [
         {
           "name": "GNU General Public License v2.0 only",
