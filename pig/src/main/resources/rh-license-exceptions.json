@@ -1508,5 +1508,16 @@
           "url": "https://opensource.org/licenses/BSD-3-Clause"
         }
       ]
+  },
+  {
+    "groupId": "org.xerial.snappy",
+    "artifactId": "snappy-java",
+    "version-regexp": "1\\..+",
+    "licenses": [
+      {
+          "name": "Apache License 2.0",
+          "url": "http://www.apache.org/licenses/LICENSE-2.0"
+      }
+    ]
   }
 ]
