@@ -1519,5 +1519,27 @@
           "url": "http://www.apache.org/licenses/LICENSE-2.0"
       }
     ]
+  },
+  {
+    "groupId": "jakarta.xml.bind",
+    "artifactId": "jakarta.xml.bind-api",
+    "version-regexp": "4\\..+",
+    "licenses": [
+      {
+          "name": "Eclipse Distribution License, Version 1.0",
+          "url": "http://repository.jboss.org/licenses/edl-1.0.txt"
+      }
+    ]
+  },
+  {
+    "groupId": "jakarta.xml.bind",
+    "artifactId": "jakarta.xml.bind-api-parent",
+    "version-regexp": "4\\..+",
+    "licenses": [
+      {
+          "name": "Eclipse Distribution License, Version 1.0",
+          "url": "http://repository.jboss.org/licenses/edl-1.0.txt"
+      }
+    ]
   }
 ]
