@@ -1541,5 +1541,27 @@
           "url": "http://repository.jboss.org/licenses/edl-1.0.txt"
       }
     ]
+  },
+  {
+    "groupId": "org.antlr",
+    "artifactId": "antlr4-master",
+    "version-regexp": "4\\..+",
+    "licenses": [
+      {
+        "name": "BSD 3-clause \"New\" or \"Revised\" License",
+        "url": "https://opensource.org/licenses/BSD-3-Clause"
+      }
+    ]
+  },
+  {
+    "groupId": "org.antlr",
+    "artifactId": "antlr4-runtime",
+    "version-regexp": "4\\..+",
+    "licenses": [
+      {
+        "name": "BSD 3-clause \"New\" or \"Revised\" License",
+        "url": "https://opensource.org/licenses/BSD-3-Clause"
+      }
+    ]
   }
 ]
