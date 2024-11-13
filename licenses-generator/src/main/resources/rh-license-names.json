@@ -57,7 +57,9 @@
     "url": "http://www.gnu.org/licenses/lgpl-3.0-standalone.html",
     "aliases": [
       "GNU Lesser General Public License, Version 3",
-      "The GNU Lesser General Public License, version 3"
+      "The GNU Lesser General Public License, version 3",
+      "GNU Lesser General Public License v3.0 only",
+      "GNU Lesser General Public License v3.0 or later"
     ],
     "urlAliases": [
       "https://www.gnu.org/licenses/lgpl-3.0-standalone.html",
@@ -89,7 +91,8 @@
     "url": "http://repository.jboss.org/licenses/gpl-2.0-ce.txt",
     "aliases": [
       "GNU General Public License, Version 2 with the Classpath Exception",
-      "GPL2 w/ CPE"
+      "GPL2 w/ CPE",
+      "GNU General Public License"
     ],
     "urlAliases": [
       "http://repository.jboss.org/licenses/gpl-2.0-ce.txt"
