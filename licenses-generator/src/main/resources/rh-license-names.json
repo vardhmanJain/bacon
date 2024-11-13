@@ -54,12 +54,14 @@
   },
   {
     "name": "GNU Lesser General Public License, Version 3",
+    "textUrl": "https://repository.jboss.org/licenses/lgpl-3.0.txt",
     "url": "http://www.gnu.org/licenses/lgpl-3.0-standalone.html",
     "aliases": [
       "GNU Lesser General Public License, Version 3",
       "The GNU Lesser General Public License, version 3"
     ],
     "urlAliases": [
+      "https://repository.jboss.org/licenses/lgpl-3.0.txt",
       "https://www.gnu.org/licenses/lgpl-3.0-standalone.html",
       "http://www.gnu.org/licenses/lgpl-3.0-standalone.html",
       "https://www.gnu.org/licenses/lgpl.html",
@@ -70,12 +72,14 @@
   },
   {
     "name": "GNU General Public License v2.0 only",
+    "textUrl": "https://repository.jboss.org/licenses/gpl-2.0.txt",
     "url": "https://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html",
     "aliases": [
       "GNU General Public License v2.0 only",
       "The GNU General Public License, Version 2"
     ],
     "urlAliases": [
+      "https://repository.jboss.org/licenses/gpl-2.0.txt",
       "https://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html",
       "http://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html",
       "https://www.gnu.org/licenses/old-licenses/gpl-2.0.html",

@@ -882,7 +882,7 @@
         "licenses": [
             {
                 "name": "GNU Lesser General Public License v3.0 or later",
-                "url": "https://www.gnu.org/licenses/lgpl-3.0.txt"
+                "url": "https://repository.jboss.org/licenses/lgpl-3.0.txt"
             },
             {
                 "name": "Apache License 2.0",
@@ -1270,7 +1270,7 @@
             },
             {
                 "name": "GNU General Public License v2.0 only",
-                "url": "https://www.gnu.org/licenses/old-licenses/gpl-2.0-standalone.html"
+                "url": "https://repository.jboss.org/licenses/gpl-2.0.txt"
             },
             {
                 "name": "BSD 3-clause \"New\" or \"Revised\" License",
