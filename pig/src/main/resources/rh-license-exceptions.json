@@ -1563,5 +1563,31 @@
                 "url": "https://opensource.org/licenses/BSD-3-Clause"
             }
         ]
-    }
+    },
+      {
+    "groupId": "org.jboss",
+    "artifactId": "jboss-parent",
+    "version-regexp": ".*",
+    "licenses": [
+      {
+        "name": "Public Domain",
+        "url": "http://repository.jboss.org/licenses/cc0-1.0.txt"
+      }
+    ]
+  },
+  {
+    "groupId": "org.cryptacular",
+    "artifactId": "cryptacular",
+    "version-regexp": ".*",
+    "licenses": [
+      {
+        "name": "Apache License 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0"
+      },
+      {
+        "name": "GNU Lesser General Public License v3.0 only",
+        "url": "https://repository.jboss.org/licenses/lgpl-3.0.txt"
+      }
+    ]
+  }
 ]
