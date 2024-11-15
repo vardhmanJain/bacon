@@ -1586,7 +1586,7 @@
             },
             {
                 "name": "GNU Lesser General Public License v3.0 only",
-                "url": "http://www.gnu.org/licenses/lgpl-3.0-standalone.html"
+                "url": "https://repository.jboss.org/licenses/lgpl-3.0.txt"
             }
         ]
     },
