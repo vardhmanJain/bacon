@@ -1586,7 +1586,7 @@
             },
             {
                 "name": "GNU Lesser General Public License v3.0 only",
-                "url": "http://www.gnu.org/licenses/lgpl-3.0-standalone.html"
+                "url": "https://repository.jboss.org/licenses/lgpl-3.0.txt"
             }
         ]
     },
@@ -1637,7 +1637,18 @@
     {
         "groupId": "org.jboss",
         "artifactId": "jboss-parent",
-        "version-regexp": ".*",
+        "version-regexp": "^([0-3]?[0-9])\\..+",
+        "licenses": [
+            {
+                "name": "Public Domain",
+                "url": "http://repository.jboss.org/licenses/cc0-1.0.txt"
+            }
+        ]
+    },
+    {
+        "groupId": "org.jboss",
+        "artifactId": "jboss-parent",
+        "version-regexp": "^([4-9]?[0-9])\\..+",
         "licenses": [
             {
                 "name": "Apache License 2.0",
@@ -1645,4 +1656,5 @@
             }
         ]
     }
+
 ]
