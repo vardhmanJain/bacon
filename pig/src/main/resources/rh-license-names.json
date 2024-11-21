@@ -454,5 +454,16 @@
         "urlAliases": [
             "http://www.opensource.org/licenses/LGPL-2.1"
         ]
+    },
+    {
+        "name": "Unicode-3.0",
+        "url": "https://raw.githubusercontent.com/unicode-org/icu/main/LICENSE",
+        "aliases": [
+          "Unicode/ICU License",
+          "Unicode-3.0"
+        ],
+        "urlAliases": [
+          "https://raw.githubusercontent.com/unicode-org/icu/main/LICENSE"
+        ]
     }
 ]
