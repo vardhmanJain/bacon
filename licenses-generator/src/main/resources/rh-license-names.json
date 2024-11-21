@@ -326,5 +326,16 @@
     "urlAliases": [
       "http://creativecommons.org/publicdomain/zero/1.0"
     ]
+  },
+  {
+    "name": "Unicode-3.0",
+    "url": "https://raw.githubusercontent.com/unicode-org/icu/main/LICENSE",
+    "aliases": [
+      "Unicode/ICU License",
+      "Unicode-3.0"
+    ],
+    "urlAliases": [
+      "https://raw.githubusercontent.com/unicode-org/icu/main/LICENSE"
+    ]
   }
 ]
