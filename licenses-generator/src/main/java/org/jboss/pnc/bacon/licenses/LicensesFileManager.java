@@ -211,28 +211,28 @@ public class LicensesFileManager {
 
         HttpGet request = new HttpGet(url);
         HttpResponse response = httpClient.execute(request);
-        if (response.getStatusLine().getStatusCode() == 429) {
-            // Too many retries: sleep a bit then retry
-            try {
-                int sleepMinutes = DOWNLOAD_RETRY_LIMIT - remainingRetries + 1;
-                logger.info(
-                        "Hit too many requests exception for url: {}, remaining retries: {}, sleeping for {} minutes",
-                        url,
-                        remainingRetries,
-                        sleepMinutes);
-                Thread.sleep(sleepMinutes * 1000 * 60);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            downloadTo(url, file, remainingRetries - 1);
-        } else {
+        // if (response.getStatusLine().getStatusCode() == 429) {
+        //     // Too many retries: sleep a bit then retry
+        //     try {
+        //         int sleepMinutes = DOWNLOAD_RETRY_LIMIT - remainingRetries + 1;
+        //         logger.info(
+        //                 "Hit too many requests exception for url: {}, remaining retries: {}, sleeping for {} minutes",
+        //                 url,
+        //                 remainingRetries,
+        //                 sleepMinutes);
+        //         Thread.sleep(sleepMinutes * 1000 * 60);
+        //     } catch (InterruptedException e) {
+        //         e.printStackTrace();
+        //     }
+        //     downloadTo(url, file, remainingRetries - 1);
+        // } else {
             HttpEntity entity = response.getEntity();
             if (entity != null) {
                 try (OutputStream stream = new FileOutputStream(file)) {
                     entity.writeTo(stream);
                 }
             }
-        }
+        // }
     }
 
     private String getLocalLicenseFileName(LicenseElement licenseElement) {
