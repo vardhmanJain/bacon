@@ -147,6 +147,7 @@ public class SourcesGenerator {
 
         File zipFile = new File(targetZipFileName);
 
+        FileUtils.validateSourceTreeSymlinks(contentsDir.toPath());
         FileUtils.zip(zipFile, workDir, contentsDir);
     }
 

@@ -27,6 +27,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.FileVisitOption;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.FileTime;
@@ -46,6 +47,8 @@ import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarConstants;
+import org.apache.commons.compress.archivers.zip.GeneralPurposeBit;
+import org.apache.commons.compress.archivers.zip.UnixStat;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipEncoding;
 import org.apache.commons.compress.archivers.zip.ZipEncodingHelper;
@@ -104,14 +107,32 @@ public final class FileUtils {
     }
 
     public static void setModeAndLastModifiedTime(Path path, ArchiveEntry entry) throws IOException {
+        setModeAndLastModifiedTime(path, entry, false);
+    }
+
+    /**
+     * Fills archive entry mode and mtime from the filesystem.
+     *
+     * @param symlinkEntry if true, read metadata from the symlink inode (do not follow); use
+     *        {@link PermissionUtils.FileType#SYMLINK} for mode bits so Unix symlink ZIP entries unzip correctly.
+     */
+    private static void setModeAndLastModifiedTime(Path path, ArchiveEntry entry, boolean symlinkEntry)
+            throws IOException {
+        final LinkOption[] linkOptions = symlinkEntry ? new LinkOption[] { LinkOption.NOFOLLOW_LINKS }
+                : new LinkOption[0];
         final FileSystem fileSystem = path.getFileSystem();
         final Set<String> attributeViews = fileSystem.supportedFileAttributeViews();
 
         log.debug("Supported file attribute views: {}", attributeViews);
 
         if (attributeViews.contains("posix")) {
-            final Set<PosixFilePermission> perms = Files.getPosixFilePermissions(path);
-            final int mode = PermissionUtils.modeFromPermissions(perms, PermissionUtils.FileType.of(path));
+            final Set<PosixFilePermission> perms = Files.getPosixFilePermissions(path, linkOptions);
+            final PermissionUtils.FileType fileType = symlinkEntry ? PermissionUtils.FileType.SYMLINK
+                    : PermissionUtils.FileType.of(path);
+            int mode = PermissionUtils.modeFromPermissions(perms, fileType);
+            if (symlinkEntry && entry instanceof ZipArchiveEntry) {
+                mode = UnixStat.LINK_FLAG | (mode & UnixStat.PERM_MASK);
+            }
 
             if (log.isDebugEnabled()) {
                 log.debug("chmod {} {}", String.format("%04o", mode), path);
@@ -131,9 +152,12 @@ public final class FileUtils {
                         path,
                         Files.getFileStore(path).type());
             }
+            if (symlinkEntry && entry instanceof ZipArchiveEntry) {
+                ((ZipArchiveEntry) entry).setUnixMode(UnixStat.LINK_FLAG | UnixStat.DEFAULT_LINK_PERM);
+            }
         }
 
-        final FileTime time = Files.getLastModifiedTime(path);
+        final FileTime time = Files.getLastModifiedTime(path, linkOptions);
 
         if (log.isDebugEnabled()) {
             log.debug(
@@ -370,17 +394,19 @@ public final class FileUtils {
 
         final Collection<String> entries = new ArrayList<>();
 
-        try (final InputStream is = Files.newInputStream(input.toPath());
-                final ArchiveInputStream in = new ArchiveStreamFactory()
-                        .createArchiveInputStream(ArchiveStreamFactory.ZIP, is)) {
+        // Commons ZipFile reads the central directory so Unix mode bits (symlinks, permissions) are available.
+        // ZipArchiveInputStream does not populate external attributes (see Commons Compress javadoc).
+        try (org.apache.commons.compress.archivers.zip.ZipFile zipFile = new org.apache.commons.compress.archivers.zip.ZipFile(
+                input.toPath())) {
             final Path dir = directory.toPath();
             final Path canonicalDir = dir.toAbsolutePath().normalize();
 
             Files.createDirectories(dir);
 
-            ZipArchiveEntry entry;
+            final Enumeration<ZipArchiveEntry> zipEntries = zipFile.getEntries();
 
-            while ((entry = (ZipArchiveEntry) in.getNextEntry()) != null) {
+            while (zipEntries.hasMoreElements()) {
+                final ZipArchiveEntry entry = zipEntries.nextElement();
                 final String entryName = entry.getName();
 
                 // If extraction is specified, only unzip the specified file or directory.
@@ -409,31 +435,93 @@ public final class FileUtils {
                 if (entry.isDirectory()) {
                     Files.createDirectories(path);
                 } else if (entry.isUnixSymlink()) {
-                    final ZipEncoding entryEncoding = entry.getGeneralPurposeBit().usesUTF8ForNames()
-                            ? ZipEncodingHelper.getZipEncoding(StandardCharsets.UTF_8.name())
-                            : ZipEncodingHelper.getZipEncoding(Charset.defaultCharset().name());
-                    final String targetName = entryEncoding.decode(IOUtils.toByteArray(in));
-                    final Path target = path.getFileSystem().getPath(targetName);
+                    try (InputStream entryIn = zipFile.getInputStream(entry)) {
+                        final ZipEncoding entryEncoding = entry.getGeneralPurposeBit().usesUTF8ForNames()
+                                ? ZipEncodingHelper.getZipEncoding(StandardCharsets.UTF_8.name())
+                                : ZipEncodingHelper.getZipEncoding(Charset.defaultCharset().name());
+                        final String targetName = entryEncoding.decode(IOUtils.toByteArray(entryIn));
+                        final Path target = path.getFileSystem().getPath(targetName);
 
-                    Files.createSymbolicLink(path, target);
+                        Files.createSymbolicLink(path, target);
+                    }
                 } else {
                     Files.createDirectories(path.getParent());
 
-                    try (final OutputStream out = Files.newOutputStream(path, StandardOpenOption.CREATE_NEW)) {
-                        IOUtils.copy(in, out);
+                    try (InputStream entryIn = zipFile.getInputStream(entry);
+                            OutputStream out = Files.newOutputStream(path, StandardOpenOption.CREATE_NEW)) {
+                        IOUtils.copy(entryIn, out);
                     }
                 }
 
-                final int mode = entry.getUnixMode();
-                final FileTime time = entry.getLastModifiedTime();
-
-                setModeAndLastModifiedTime(path, mode, time);
+                if (entry.isUnixSymlink()) {
+                    log.debug("Skipping mode and mtime for symlink: {}", path);
+                } else {
+                    final int mode = entry.getUnixMode();
+                    final FileTime time = entry.getLastModifiedTime();
+                    setModeAndLastModifiedTime(path, mode, time);
+                }
             }
-        } catch (IOException | ArchiveException e) {
+        } catch (IOException e) {
             throw new RuntimeException("Unzip of " + input + " to " + directory + " failed", e);
         }
 
         return Collections.unmodifiableCollection(entries);
+    }
+
+    /**
+     * Verifies every symbolic link under {@code contentsRoot} resolves to an existing path and stays inside
+     * {@code contentsRoot}. Intended to run on customer-facing source trees before zipping.
+     *
+     * @param contentsRoot top-level directory of staged sources (e.g. PiG {@code contentsDir})
+     * @throws IllegalArgumentException if {@code contentsRoot} is not a directory
+     * @throws RuntimeException if any symlink is broken or points outside the tree
+     */
+    public static void validateSourceTreeSymlinks(final Path contentsRoot) {
+        if (!Files.isDirectory(contentsRoot)) {
+            throw new IllegalArgumentException("Not a directory: " + contentsRoot);
+        }
+        final Path root = contentsRoot.toAbsolutePath().normalize();
+        final List<String> errors = new ArrayList<>();
+        try (Stream<Path> stream = Files.walk(root)) {
+            stream.forEach(path -> {
+                if (!Files.isSymbolicLink(path)) {
+                    return;
+                }
+                try {
+                    final Path rawTarget = Files.readSymbolicLink(path);
+                    final Path parent = path.getParent();
+                    final Path resolved = (parent == null ? rawTarget : parent.resolve(rawTarget)).normalize();
+                    final Path absoluteResolved = resolved.toAbsolutePath().normalize();
+                    if (!absoluteResolved.startsWith(root)) {
+                        errors.add(
+                                String.format(
+                                        "Symlink escapes sources root: %s -> %s (resolves to %s)",
+                                        root.relativize(path.normalize()),
+                                        rawTarget,
+                                        absoluteResolved));
+                        return;
+                    }
+                    if (!Files.exists(absoluteResolved)) {
+                        errors.add(
+                                String.format(
+                                        "Broken symlink: %s -> %s (nothing exists at %s)",
+                                        root.relativize(path.normalize()),
+                                        rawTarget,
+                                        absoluteResolved));
+                    }
+                } catch (IOException e) {
+                    errors.add(String.format("%s: %s", root.relativize(path.normalize()), e.getMessage()));
+                }
+            });
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to walk sources tree for symlink validation: " + contentsRoot, e);
+        }
+        if (!errors.isEmpty()) {
+            throw new RuntimeException(
+                    "Sources tree symlink validation failed. Fix source archives or extraction before shipping the zip:\n"
+                            + String.join("\n", errors));
+        }
+        log.info("Validated symlinks under {}", root);
     }
 
     public static Collection<String> zip(final File output, final File workingDirectory, final File directoryToZip) {
@@ -458,19 +546,27 @@ public final class FileUtils {
 
                     String entryName = FilenameUtils
                             .normalize(workingDirectory.toPath().relativize(path).toString(), true);
-                    if (Files.isDirectory(path)) {
-                        entryName += "/"; // required for directories
+                    if (Files.isDirectory(path) && !Files.isSymbolicLink(path)) {
+                        entryName += "/"; // required for directories (not symlink-to-dir entries)
                     }
 
                     log.debug("zip: {}", entryName);
 
                     entries.add(entryName);
 
-                    final ArchiveEntry entry = new ZipArchiveEntry(path.toFile(), entryName);
+                    final ZipArchiveEntry zipEntry;
+                    if (Files.isSymbolicLink(path)) {
+                        zipEntry = new ZipArchiveEntry(path, entryName, LinkOption.NOFOLLOW_LINKS);
+                        setModeAndLastModifiedTime(path, zipEntry, true);
+                        GeneralPurposeBit gpb = new GeneralPurposeBit();
+                        gpb.useUTF8ForNames(true);
+                        zipEntry.setGeneralPurposeBit(gpb);
+                    } else {
+                        zipEntry = new ZipArchiveEntry(path.toFile(), entryName);
+                        setModeAndLastModifiedTime(path, zipEntry);
+                    }
 
-                    setModeAndLastModifiedTime(path, entry);
-
-                    os.putArchiveEntry(entry);
+                    os.putArchiveEntry(zipEntry);
 
                     if (Files.isSymbolicLink(path)) {
                         final Path symlinkDestination = Files.readSymbolicLink(path);
