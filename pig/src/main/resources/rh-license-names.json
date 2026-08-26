@@ -125,6 +125,7 @@
         "urlAliases": [
             "http://repository.jboss.org/licenses/gpl-2.0-ce.txt",
             "http://openjdk.java.net/legal/gplv2+ce.html",
+            "https://openjdk.org/legal/gplv2+ce.html",
             "https://www.gnu.org/software/classpath/license.html",
             "https://projects.eclipse.org/license/secondary-gpl-2.0-cp"
         ]
